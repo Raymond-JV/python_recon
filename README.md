@@ -42,7 +42,7 @@ An orgs dir is created for saving results.
 
 ## TODO
 * Implement a cleaner solution for reading config files.
-* Utilize Luigi to create a Pipeline so failures are handeled more reliably.
+* Utilize Luigi to create a Pipeline so failures are handled more reliably.
 * Cleanup the BasicCommand class and include more tools.
 * Add SMS Notifications.
 * Use a package manager.
