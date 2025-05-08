@@ -1,5 +1,5 @@
 # python_recon
-This is a personal program that I wrote to automate recon for bug bounty. It cycles through subfinder, amass and nuclei to find subdomains and takeovers. It is also possible to add additional commands.
+This is a personal program that I wrote to automate continuous recon for bug bounty. It cycles through subfinder, amass and nuclei to find subdomains and takeovers.
 
 ![search2](resources/search2.png)
 
@@ -14,7 +14,7 @@ options:
                         Max thread count
   -d, --debug
 ```
-The ```max-threads``` flag determines how many targets to scan at once. 
+The ```max-threads``` flag determines how many targets to scan at once. For example, setting ```-t 2``` will loop through all of the targets indefinitely two at a time.
 
 ## Setup
 
@@ -33,8 +33,6 @@ Good luck :)
 ```
 ![search1](resources/search1.png)
 
-![](resources/)
-
 ## Results
 An orgs dir is created for saving results.
 
@@ -42,4 +40,9 @@ An orgs dir is created for saving results.
 
 ![found_subs](resources/newegg_subs.png)
 
-
+## TODO
+* Implement a cleaner solution for reading config files.
+* Utilize Luigi to create a Pipeline so failures are handeled more reliably.
+* Cleanup the BasicCommand class and include more tools.
+* Add SMS Notifications.
+* Use a package manager.
