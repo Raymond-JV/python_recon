@@ -17,7 +17,7 @@ class ChainContext:
     def __init__(self, chain : List[BasicCommand]):
         self.chain = chain
         self.chain_start = datetime.now()
-        self.set_running_task(BasicCommand('', {}, None))
+        self.deactivate_task()
     
     def chain_duration(self):
         current_time = datetime.now()
@@ -30,21 +30,22 @@ class ChainContext:
     def start(self):
         links = [task.cmd for task in self.chain]
         logging.debug(f'starting chain {links}')
-        i = 0
-        logging.debug(f'chain links: {len(links)} chain cycle {i}')
-        for cmd in self.chain:
+        logging.debug(f'chain links: {len(links)} chain cycle 0')
+        for index,cmd in enumerate(self.chain):
             self.set_running_task(cmd)
             try:
                 cmd.process()
             except Exception as e:
-                print(f"An unexpected error occurred: {e}")
-            i = i + 1
-            logging.debug(f'chain cycle {i}')
-        self.set_running_task('None') 
+                logging.debug(f"An unexpected error occurred: {e}", exc_info=True)
+            logging.debug(f'chain cycle {index}')
+        self.deactivate_task()
 
     def set_running_task(self, cmd : BasicCommand):
         self.running_task = cmd
         self.task_start = datetime.now()
+
+    def deactivate_task(self):
+        self.set_running_task(BasicCommand('Idle', {}, None))
 
 def get_file_paths(dir_path):
     if not dir_path.is_dir():
@@ -71,8 +72,8 @@ def create_exec_chain(org):
     return [
         BasicCommand('sleep 5', args, subs_output),
         BasicCommand('subfinder -all -silent -dL {domains} -rL {resolvers} -nc -config {subfinder_config}', args, subs_output),
-        Amass('amass enum -active -silent -df {domains} -config {amass_config} -rf {resolvers} -dns-qps -nocolor  {dns-qps}', args, subs_output),
-        Nuclei('nuclei -l {subs}  -silent -r {resolvers} -t http/takeovers/', args, takeover_output)
+        Amass('amass enum -active -silent -df {domains} -config {amass_config} -rf {resolvers} -dns-qps {dns-qps} -nocolor', args, subs_output),
+        Nuclei('nuclei -l {subs} -silent -r {resolvers} -t http/takeovers/', args, takeover_output)
             ]
 
 def create_contexts(root, scope_paths):
@@ -99,7 +100,6 @@ def continuous_scan(executor, org_contexts):
         for org_name, contexts in org_contexts.items():
             future = contexts['future']
             chain_context = contexts['chain_context']
-            logging.debug(f'continuous scan {org_name} {chain_context.running_task} {chain_context.task_duration()}')
             print(f'{org_name} {chain_context.running_task.fmt_cmd} {chain_context.task_duration()}')
             if future.done():
                 logging.debug('task finished')
@@ -116,12 +116,11 @@ def init_logger(logger_level):
     )
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Search for subdomains from HackerOne")
+    parser = argparse.ArgumentParser(description="Python Recon")
     parser.add_argument("dir", type=Path, help="The path to scope files from HackerOne")
     parser.add_argument("-t", "--max-threads", type=int, default=25, help="Max thread count")
     parser.add_argument(
     '-d', '--debug',
-    help="Print lots of debugging statements",
     action="store_const", dest="loglevel", const=logging.DEBUG,
     default=logging.WARNING,
     )

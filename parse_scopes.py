@@ -53,7 +53,10 @@ def extract_domains(data):
         host = f"{ext.subdomain}.{ext.domain}.{ext.suffix}" 
         if host: 
             host = host.replace('www.' , '')
-            host = host.replace('*.'   , '')
+            parts = host.split('.')
+            if '*'in parts[0]:
+                host = '.'.join(parts[1:])
+            host = host.replace('*.', '')
             host = host.lstrip('.')
             domains.add(host)
 
