@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import argparse
 import csv
 import logging
@@ -20,7 +19,7 @@ class Organization:
 
     def create_files(self):
         if not self.org_path.exists():
-            self.org_path.mkdir()
+            self.org_path.mkdir(parents=True)
         with self.domains_path.open('w') as f:
             for domain in self.domains:
                 logging.debug(f'writing {domain} to {self.domains_path}')
@@ -54,10 +53,7 @@ def extract_domains(data):
         host = f"{ext.subdomain}.{ext.domain}.{ext.suffix}" 
         if host: 
             host = host.replace('www.' , '')
-            parts = host.split('.')
-            if '*'in parts[0]:
-                host = '.'.join(parts[1:])
-            host = host.replace('*.', '')
+            host = host.replace('*.'   , '')
             host = host.lstrip('.')
             domains.add(host)
 
